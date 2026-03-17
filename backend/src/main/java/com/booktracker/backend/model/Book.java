@@ -1,6 +1,8 @@
 package com.booktracker.backend.model;
 
 public class Book {
+
+    private Integer coverId;
     private int id;
     private String title;
     private String author;

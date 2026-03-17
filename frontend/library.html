@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Library</title>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+<h1></h1>
+
+<div id="root"></div>
+
+<script type="text/babel">
+
+    function App() {
+
+        const [darkMode, setDarkMode] = React.useState(
+            localStorage.getItem("theme") === "dark"
+        );
+
+        React.useEffect(() => {
+            if (darkMode) {
+                document.body.classList.add("dark");
+                localStorage.setItem("theme", "dark");
+            } else {
+                document.body.classList.remove("dark");
+                localStorage.setItem("theme", "light");
+            }
+        }, [darkMode]);
+
+        const [books, setBooks] = React.useState([]);
+
+        const fetchBooks = async () => {
+            const res = await fetch("http://localhost:8080/books");
+            const data = await res.json();
+            setBooks(data);
+        };
+
+        React.useEffect(() => {
+            fetchBooks();
+        }, []);
+
+        const updateBook = async (book) => {
+            await fetch(`http://localhost:8080/books/${book.id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(book)
+            });
+
+            fetchBooks();
+        };
+
+        const renderBooks = (status) => {
+    return books
+        .filter(b => b.status === status)
+        .map(book => {
+
+            const progress = (book.pagesRead / book.totalPages) * 100;
+
+            return (
+                <div className="book-card" key={book.id}>
+
+                    {/* Cover (placeholder for now) */}
+                    <img
+                        src={
+                            book.coverId
+                            ? `https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg`
+                            : "https://via.placeholder.com/50x70"
+                        }
+                    />
+
+                    <div className="book-info">
+                        <b>{book.title}</b><br/>
+                        <small>{book.author}</small>
+
+                        <div className="progress-bar">
+                            <div
+                                className="progress-fill"
+                                style={{ width: `${progress}%` }}
+                            ></div>
+                        </div>
+
+                        <small>
+                            {book.pagesRead} / {book.totalPages}
+                        </small>
+                    </div>
+
+                    <div className="book-actions">
+                        <button onClick={() => {
+                            book.status = "WANT_TO_READ";
+                            updateBook(book);
+                        }}>Want</button>
+
+                        <button onClick={() => {
+                            book.status = "READING";
+                            updateBook(book);
+                        }}>Reading</button>
+
+                        <button onClick={() => {
+                            book.status = "COMPLETED";
+                            updateBook(book);
+                        }}>Done</button>
+                    </div>
+                </div>
+            );
+        });
+};
+
+        return (
+    <div>
+        <div className="header">
+            <div className="title">My Library</div>
+            <div className="toggle" onClick={() => setDarkMode(!darkMode)}>
+                {darkMode ? "Dark" : "Light"}
+            </div>
+        </div>
+
+        <div className="section">
+            <h2>Reading</h2>
+            {renderBooks("READING")}
+
+            <h2>Want to Read</h2>
+            {renderBooks("WANT_TO_READ")}
+
+            <h2>Completed</h2>
+            {renderBooks("COMPLETED")}
+        </div>
+
+        <div className="footer">
+            <a href="index.html">← Back to Search</a>
+        </div>
+    </div>
+);
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+</script>
+</body>
+</html>
