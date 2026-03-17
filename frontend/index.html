@@ -24,6 +24,18 @@
 
     function App() {
 
+        const [books, setBooks] = React.useState([]);
+
+        const fetchBooks = async () => {
+            const res = await fetch("http://localhost:8080/books");
+            const data = await res.json();
+            setBooks(data);
+        };
+
+        React.useEffect(() => {
+            fetchBooks();
+        }, []);
+
         const [darkMode, setDarkMode] = React.useState(
             localStorage.getItem("theme") === "dark"
         );
@@ -62,9 +74,11 @@
                     coverId: book.cover_i || null
                 })
             });
-
+            fetchBooks();
             alert("Book added!");
         };
+            const readingBooks = books.filter(b => b.status === "READING");
+
 
         return (
     <div>
@@ -90,28 +104,42 @@
         <div className="section">
             <h2>Reading</h2>
 
-            {results.slice(0, 3).map((book, i) => {
-                const cover = book.cover_i
-                    ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
-                    : "";
 
-                return (
-                    <div className="book-card" key={i}>
-                        {cover && <img src={cover} />}
+            {readingBooks.length === 0 ? (
+                <p className="empty-state" style={{ opacity: 0.6 }}>
+                    You are not reading anything currently 📖
+                </p>
+            ) : (
+                readingBooks.map(book => {
+                    const progress = (book.pagesRead / book.totalPages) * 100;
 
-                        <div className="book-info">
-                            <b>{book.title}</b><br/>
-                            <small>{book.author_name?.[0]}</small>
+                    const cover = book.coverId
+                        ? `https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg`
+                        : null;
 
-                            <div className="progress-bar">
-                                <div className="progress-fill" style={{width: "40%"}}></div>
+                    return (
+                        <div className="book-card" key={book.id}>
+                            {cover && <img src={cover} />}
+
+                            <div className="book-info">
+                                <b>{book.title}</b><br/>
+                                <small>{book.author}</small>
+
+                                <div className="progress-bar">
+                                    <div
+                                        className="progress-fill"
+                                        style={{ width: `${progress}%` }}
+                                    ></div>
+                                </div>
+
+                                <small>
+                                    {book.pagesRead} / {book.totalPages}
+                                </small>
                             </div>
                         </div>
-
-                        <button onClick={() => addBook(book)}>Add</button>
-                    </div>
-                );
-            })}
+                    );
+                })
+            )}
         </div>
 
         <div className="footer">

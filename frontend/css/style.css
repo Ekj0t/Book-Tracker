@@ -172,3 +172,9 @@ body {
 .footer a:hover {
     transform: translateX(-2px);
 }
+
+.empty-state {
+    opacity: 0.6;
+    font-size: 14px;
+    margin-top: 10px;
+}
