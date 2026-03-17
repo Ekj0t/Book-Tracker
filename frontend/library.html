@@ -65,60 +65,99 @@
         };
 
         const renderBooks = (status) => {
-    return books
-        .filter(b => b.status === status)
-        .map(book => {
+            return books
+                .filter(b => b.status === status)
+                .map(book => {
 
-            const progress = (book.pagesRead / book.totalPages) * 100;
+                    const progress = (book.pagesRead / book.totalPages) * 100;
 
-            return (
-                <div className="book-card" key={book.id}>
+                    return (
+                        <div className="book-card" key={book.id}>
 
-                    {/* Cover (placeholder for now) */}
-                    <img
-                        src={
-                            book.coverId
-                            ? `https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg`
-                            : "https://via.placeholder.com/50x70"
-                        }
-                    />
+                            {/* Cover (placeholder for now) */}
+                            <img
+                                src={
+                                    book.coverId
+                                    ? `https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg`
+                                    : "https://via.placeholder.com/50x70"
+                                }
+                            />
 
-                    <div className="book-info">
-                        <b>{book.title}</b><br/>
-                        <small>{book.author}</small>
+                            <div className="book-info">
+                                <b>{book.title}</b><br/>
+                                <small>{book.author}</small>
 
-                        <div className="progress-bar">
-                            <div
-                                className="progress-fill"
-                                style={{ width: `${progress}%` }}
-                            ></div>
+                                {book.status === "READING" && (
+                                    <>
+                                        <div className="progress-bar">
+                                            <div
+                                                className="progress-fill"
+                                                style={{
+                                                    width: `${(book.pagesRead / book.totalPages) * 100}%`
+                                                }}
+                                            ></div>
+                                        </div>
+
+                                        <div style={{ marginTop: "8px" }}>
+                                            <input
+                                                type="number"
+                                                value={book.pagesRead}
+                                                min="0"
+                                                max={book.totalPages}
+                                                style={{
+                                                    width: "70px",
+                                                    padding: "4px",
+                                                    marginRight: "6px",
+                                                    background: "var(--card)",
+                                                    border: "1px solid var(--border)",
+                                                    color: "var(--text)"
+                                                }}
+                                                onChange={(e) => {
+                                                    let newPages = parseInt(e.target.value) || 0;
+
+                                                    if (newPages > book.totalPages) {
+                                                        newPages = book.totalPages;
+                                                    }
+
+                                                    book.pagesRead = newPages;
+
+                                                    // auto complete
+                                                    if (newPages === book.totalPages) {
+                                                        book.status = "COMPLETED";
+                                                    }
+
+                                                    updateBook(book);
+                                                }}
+                                            />
+
+                                            <small>
+                                                / {book.totalPages}
+                                            </small>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
+                            <div className="book-actions">
+                                <button onClick={() => {
+                                    book.status = "WANT_TO_READ";
+                                    updateBook(book);
+                                }}>Want</button>
+
+                                <button onClick={() => {
+                                    book.status = "READING";
+                                    updateBook(book);
+                                }}>Reading</button>
+
+                                <button onClick={() => {
+                                    book.status = "COMPLETED";
+                                    updateBook(book);
+                                }}>Done</button>
+                            </div>
                         </div>
-
-                        <small>
-                            {book.pagesRead} / {book.totalPages}
-                        </small>
-                    </div>
-
-                    <div className="book-actions">
-                        <button onClick={() => {
-                            book.status = "WANT_TO_READ";
-                            updateBook(book);
-                        }}>Want</button>
-
-                        <button onClick={() => {
-                            book.status = "READING";
-                            updateBook(book);
-                        }}>Reading</button>
-
-                        <button onClick={() => {
-                            book.status = "COMPLETED";
-                            updateBook(book);
-                        }}>Done</button>
-                    </div>
-                </div>
-            );
-        });
-};
+                    );
+                });
+        };
 
         return (
     <div>

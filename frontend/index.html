@@ -87,7 +87,23 @@
             setToast("Book added!");
             setTimeout(() => setToast(""), 2000);
         };
-            const readingBooks = books.filter(b => b.status === "READING");
+
+        const updateBook = async (book) => {
+            await fetch(`http://localhost:8080/books/${book.id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(book)
+            });
+
+            // ✅ update UI AFTER request
+            setBooks(prev =>
+                prev.map(b => b.id === book.id ? { ...book } : b)
+            );
+        };
+
+        const readingBooks = books.filter(b => b.status === "READING");
 
 
         return (
@@ -176,9 +192,40 @@
                                             ></div>
                                         </div>
 
-                                        <small>
-                                            {book.pagesRead} / {book.totalPages}
-                                        </small>
+                                        <div style={{ marginTop: "6px" }}>
+                                            <input
+                                                type="number"
+                                                value={book.pagesRead}
+                                                min="0"
+                                                max={book.totalPages}
+                                                style={{
+                                                    width: "60px",
+                                                    padding: "4px",
+                                                    marginRight: "6px",
+                                                    background: "var(--card)",
+                                                    border: "1px solid var(--border)",
+                                                    color: "var(--text)"
+                                                }}
+                                                onChange={(e) => {
+                                                    let newPages = parseInt(e.target.value) || 0;
+
+                                                    if (newPages > book.totalPages) {
+                                                        newPages = book.totalPages;
+                                                    }
+
+                                                    book.pagesRead = newPages;
+
+                                                    if (newPages === book.totalPages) {
+                                                        book.status = "COMPLETED";
+                                                    }
+
+                                                    updateBook(book);
+
+                                                }}
+                                            />
+
+                                            <small>/ {book.totalPages}</small>
+                                        </div>
                                     </div>
                                 </div>
                             );
