@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
+
+    <script>
+        if (localStorage.getItem("theme") === "dark") {
+            document.documentElement.classList.add("dark");
+        }
+    </script>
+
     <title>Book Tracker</title>
 
     <!-- React CDN -->
@@ -19,12 +26,6 @@
 <h1></h1>
 
 <div id="root"></div>
-
-<script>
-    if (localStorage.getItem("theme") === "dark") {
-        document.documentElement.classList.add("dark");
-    }
-</script>
 
 <script type="text/babel">
 
