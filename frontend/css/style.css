@@ -7,7 +7,7 @@
     --button: #e5e5e5;
 }
 
-body.dark {
+html.dark {
     --bg: #0f1115;
     --text: #e6e6e6;
     --card: #1c1f26;
@@ -177,4 +177,28 @@ body {
     opacity: 0.6;
     font-size: 14px;
     margin-top: 10px;
+}
+
+.toast {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 12px 18px;
+    border-radius: 10px;
+
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }

@@ -20,9 +20,17 @@
 
 <div id="root"></div>
 
+<script>
+    if (localStorage.getItem("theme") === "dark") {
+        document.documentElement.classList.add("dark");
+    }
+</script>
+
 <script type="text/babel">
 
     function App() {
+
+        const [toast, setToast] = React.useState("");
 
         const [books, setBooks] = React.useState([]);
 
@@ -42,10 +50,10 @@
 
         React.useEffect(() => {
             if (darkMode) {
-                document.body.classList.add("dark");
+                document.documentElement.classList.add("dark");
                 localStorage.setItem("theme", "dark");
             } else {
-                document.body.classList.remove("dark");
+                document.documentElement.classList.remove("dark");
                 localStorage.setItem("theme", "light");
             }
         }, [darkMode]);
@@ -75,78 +83,115 @@
                 })
             });
             fetchBooks();
-            alert("Book added!");
+            setResults([]);
+            setToast("Book added!");
+            setTimeout(() => setToast(""), 2000);
         };
             const readingBooks = books.filter(b => b.status === "READING");
 
 
         return (
-    <div>
-        <div className="header">
-            <div className="title">Book Tracker</div>
-            <div className="toggle" onClick={() => setDarkMode(!darkMode)}>
-                {darkMode ? "Dark" : "Light"}
-            </div>
-        </div>
+            <div>
 
-        <div className="search-container">
-            <div className="search-box">
-                <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search books..."
-                />
-                <button onClick={searchBooks}>Search</button>
-            </div>
-        </div>
+                {toast && (
+                    <div className="toast show">
+                        {toast}
+                    </div>
+                )}
 
-        {/* Reading Section */}
-        <div className="section">
-            <h2>Reading</h2>
+                <div className="header">
+                    <div className="title">Book Tracker</div>
+                    <div className="toggle" onClick={() => setDarkMode(!darkMode)}>
+                        {darkMode ? "Dark" : "Light"}
+                    </div>
+                </div>
 
+                <div className="search-container">
+                    <div className="search-box">
+                        <input
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="Search books..."
+                        />
+                        <button onClick={searchBooks}>Search</button>
+                    </div>
+                </div>
 
-            {readingBooks.length === 0 ? (
-                <p className="empty-state" style={{ opacity: 0.6 }}>
-                    You are not reading anything currently 📖
-                </p>
-            ) : (
-                readingBooks.map(book => {
-                    const progress = (book.pagesRead / book.totalPages) * 100;
+                {results.length > 0 && (
+                    <div className="section">
+                        <h2>Search Results</h2>
 
-                    const cover = book.coverId
-                        ? `https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg`
-                        : null;
+                        {results.map((book, i) => {
+                            const cover = book.cover_i
+                                ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+                                : null;
 
-                    return (
-                        <div className="book-card" key={book.id}>
-                            {cover && <img src={cover} />}
+                            return (
+                                <div className="book-card" key={i}>
+                                    {cover && <img src={cover} />}
 
-                            <div className="book-info">
-                                <b>{book.title}</b><br/>
-                                <small>{book.author}</small>
+                                    <div className="book-info">
+                                        <b>{book.title}</b><br/>
+                                        <small>{book.author_name?.[0]}</small>
+                                    </div>
 
-                                <div className="progress-bar">
-                                    <div
-                                        className="progress-fill"
-                                        style={{ width: `${progress}%` }}
-                                    ></div>
+                                    <div className="book-actions">
+                                        <button onClick={() => addBook(book)}>
+                                            Add
+                                        </button>
+                                    </div>
                                 </div>
+                            );
+                        })}
+                    </div>
+                )}
 
-                                <small>
-                                    {book.pagesRead} / {book.totalPages}
-                                </small>
-                            </div>
-                        </div>
-                    );
-                })
-            )}
-        </div>
+                <div className="section">
+                    <h2>Reading</h2>
 
-        <div className="footer">
-            <a href="library.html">Go to Library →</a>
-        </div>
-    </div>
-);
+                    {readingBooks.length === 0 ? (
+                        <p className="empty-state">
+                            You are not reading anything currently 📖
+                        </p>
+                    ) : (
+                        readingBooks.map(book => {
+                            const progress = (book.pagesRead / book.totalPages) * 100;
+
+                            const cover = book.coverId
+                                ? `https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg`
+                                : null;
+
+                            return (
+                                <div className="book-card" key={book.id}>
+                                    {cover && <img src={cover} />}
+
+                                    <div className="book-info">
+                                        <b>{book.title}</b><br/>
+                                        <small>{book.author}</small>
+
+                                        <div className="progress-bar">
+                                            <div
+                                                className="progress-fill"
+                                                style={{ width: `${progress}%` }}
+                                            ></div>
+                                        </div>
+
+                                        <small>
+                                            {book.pagesRead} / {book.totalPages}
+                                        </small>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+
+                <div className="footer">
+                    <a href="library.html">Go to Library →</a>
+                </div>
+
+            </div>
+        );
     }
 
     ReactDOM.createRoot(document.getElementById("root")).render(<App />);
