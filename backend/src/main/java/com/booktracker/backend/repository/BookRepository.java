@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public class BookRepository {
 
-    private final String FILE_PATH = "src/main/resources/data/books.json";
+    private final String FILE_PATH = "backend/src/main/resources/data/books.json";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public List<Book> getAllBooks() {
