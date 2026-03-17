@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Tracker</title>
+
+    <!-- React CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel (to use JSX) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+<h1>📚 Book Tracker</h1>
+
+<div id="root"></div>
+
+<script type="text/babel">
+
+    function App() {
+        const [query, setQuery] = React.useState("");
+        const [results, setResults] = React.useState([]);
+
+        const searchBooks = async () => {
+            const res = await fetch(`https://openlibrary.org/search.json?q=${query}`);
+            const data = await res.json();
+            setResults(data.docs.slice(0, 10));
+        };
+
+        const addBook = async (book) => {
+            await fetch("http://localhost:8080/books", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    title: book.title,
+                    author: book.author_name ? book.author_name[0] : "Unknown",
+                    totalPages: book.number_of_pages_median || 100,
+                    pagesRead: 0,
+                    status: "WANT_TO_READ"
+                })
+            });
+
+            alert("Book added!");
+        };
+
+        return (
+            <div>
+                <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search books..."
+                />
+                <button onClick={searchBooks}>Search</button>
+
+                <ul>
+                    {results.map((book, index) => (
+                        <li key={index}>
+                            <b>{book.title}</b> - {book.author_name?.[0]}
+                            <button onClick={() => addBook(book)}>
+                                Add
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+
+                <br/>
+                <a href="library.html">Go to Library →</a>
+            </div>
+        );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+</script>
+</body>
+</html>
